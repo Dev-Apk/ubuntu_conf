@@ -27,3 +27,11 @@ curl -fsSL https://raw.githubusercontent.com/Dev-Apk/ubuntu_conf/refs/heads/main
 ```bash
 curl -fsSL https://raw.githubusercontent.com/Dev-Apk/ubuntu_conf/refs/heads/main/sudo-nopass.sh | sudo bash
 ```
+
+
+### 3. Установка Docker и Docker Compose (`install-docker.sh`)
+Скрипт полностью автоматизирует установку официального Docker Engine и Docker Compose плагина. Он удаляет конфликтующие старые версии, добавляет официальный репозиторий, настраивает автозапуск и добавляет текущего пользователя в группу `docker` для работы без `sudo`.
+
+**Команда для запуска:**
+```bash
+curl -fsSL https://raw.githubusercontent.com/Dev-Apk/ubuntu_conf/refs/heads/main/install-docker.sh | sudo bash
