@@ -2,7 +2,7 @@
 set -e
 
 # ============================================
-# Проверка прав root
+# 1. Проверка прав root
 # ============================================
 if [ "$EUID" -ne 0 ]; then
   echo "❌ Ошибка: Требуются права root."
@@ -10,42 +10,36 @@ if [ "$EUID" -ne 0 ]; then
   exit 1
 fi
 
-echo "🚀 Начало установки AI Stack..."
+echo "🚀 Начало установки AI Stack и Dockge..."
 
 # ============================================
-# Проверка Docker
+# 2. Проверка Docker
 # ============================================
-if ! command -v docker &> /dev/null; then
-    echo "❌ Docker не установлен. Установите его командой:"
-    echo "curl -fsSL https://raw.githubusercontent.com/Dev-Apk/ubuntu_conf/refs/heads/main/install-docker.sh | sudo bash"
+if ! command -v docker &> /dev/null || ! docker compose version &> /dev/null; then
+    echo "❌ Docker или Docker Compose не установлены."
+    echo "Сначала установите Docker: curl -fsSL https://raw.githubusercontent.com/Dev-Apk/ubuntu_conf/refs/heads/main/install-docker.sh | sudo bash"
     exit 1
 fi
 
-if ! docker compose version &> /dev/null; then
-    echo "❌ Docker Compose не установлен."
-    exit 1
-fi
-
-echo "✅ Docker и Docker Compose найдены."
-
 # ============================================
-# Определение UID/GID пользователя
+# 3. Определение UID/GID текущего пользователя
 # ============================================
 TARGET_UID=${SUDO_UID:-1000}
 TARGET_GID=${SUDO_GID:-1000}
 
-INSTALL_DIR="/opt/stacks/ai_stack"
+AI_STACK_DIR="/opt/stacks/ai_stack"
+DOCKGE_DIR="/opt/stacks/dockge"
 
-echo "📁 Создание структуры папок в $INSTALL_DIR..."
-sudo mkdir -p "$INSTALL_DIR"/{config/nginx,data/{postgres,paperclip,freellmapi}}
+echo "📁 Создание структуры папок..."
+mkdir -p "$AI_STACK_DIR"/{config/nginx,data/{postgres,paperclip,freellmapi}}
+mkdir -p "$DOCKGE_DIR/data"
 
 # ============================================
-# 1. Запись docker-compose.yml
+# 4. Генерация docker-compose.yml для AI Stack
 # ============================================
-echo "📝 Запись docker-compose.yml..."
-sudo tee "$INSTALL_DIR/docker-compose.yml" > /dev/null << 'EOF'
+echo "📝 Создание конфигурации AI Stack..."
+cat > "$AI_STACK_DIR/docker-compose.yml" << EOF
 services:
-  # PostgreSQL 17 — база данных для Paperclip
   db:
     image: postgres:17-alpine
     container_name: paperclip_db
@@ -64,7 +58,6 @@ services:
       timeout: 5s
       retries: 5
 
-  # Paperclip (режим private)
   paperclip:
     image: ghcr.io/paperclipai/paperclip:latest
     container_name: paperclip_service
@@ -85,7 +78,6 @@ services:
     restart: unless-stopped
     stop_grace_period: 90s
 
-  # FreeLLMAPI
   freellmapi:
     image: ghcr.io/tashfeenahmed/freellmapi:latest
     container_name: freellm_service
@@ -100,7 +92,6 @@ services:
       - app_network
     restart: unless-stopped
 
-  # Nginx — обратный прокси
   nginx:
     image: nginx:alpine
     container_name: nginx_proxy
@@ -121,10 +112,10 @@ networks:
 EOF
 
 # ============================================
-# 2. Запись nginx.conf
+# 5. Создание nginx.conf (гарантированно как файл)
 # ============================================
-echo " Запись nginx.conf..."
-sudo tee "$INSTALL_DIR/config/nginx/nginx.conf" > /dev/null << 'EOF'
+echo "📝 Создание nginx.conf..."
+cat > "$AI_STACK_DIR/config/nginx/nginx.conf" << 'EOF'
 events { worker_connections 1024; }
 http {
     resolver 127.0.0.11 valid=30s;
@@ -151,48 +142,61 @@ http {
 EOF
 
 # ============================================
-# 3. Генерация .env с ключом шифрования
+# 6. Генерация .env для FreeLLMAPI
 # ============================================
-echo "🔑 Генерация ENCRYPTION_KEY для FreeLLMAPI..."
-ENCRYPTION_KEY=$(openssl rand -hex 32)
-sudo echo "ENCRYPTION_KEY=$ENCRYPTION_KEY" | sudo tee "$INSTALL_DIR/.env" > /dev/null
-echo "✅ Ключ сохранён в $INSTALL_DIR/.env"
+echo "🔑 Генерация ключа шифрования..."
+echo "ENCRYPTION_KEY=$(openssl rand -hex 32)" > "$AI_STACK_DIR/.env"
 
 # ============================================
-# 4. Исправление прав доступа
+# 7. Генерация docker-compose.yml для Dockge
 # ============================================
-echo "🔧 Исправление прав доступа..."
-sudo chown -R $TARGET_UID:$TARGET_GID /opt/stacks
+echo "📝 Создание конфигурации Dockge..."
+cat > "$DOCKGE_DIR/docker-compose.yml" << EOF
+services:
+  dockge:
+    image: louislam/dockge:1
+    container_name: dockge
+    restart: unless-stopped
+    ports:
+      - "5001:5001"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /opt/stacks/dockge/data:/app/data
+      - /opt/stacks:/opt/stacks
+    environment:
+      - DOCKGE_STACKS_DIR=/opt/stacks
+      - PUID=$TARGET_UID
+      - PGID=$TARGET_GID
+EOF
 
 # ============================================
-# 5. Первый запуск стека
+# 8. Исправление прав доступа
 # ============================================
+echo "🔧 Настройка прав доступа..."
+chown -R $TARGET_UID:$TARGET_GID /opt/stacks
+
+# ============================================
+# 9. Запуск всех сервисов
+# ============================================
+echo "🚀 Запуск Dockge..."
+cd "$DOCKGE_DIR"
+docker compose up -d
+
 echo "🚀 Запуск AI Stack..."
-cd "$INSTALL_DIR"
-sudo docker compose up -d
+cd "$AI_STACK_DIR"
+docker compose up -d
 
 # ============================================
-# 6. Вывод информации
+# 10. Финальный вывод
 # ============================================
+SERVER_IP=$(hostname -I | awk '{print $1}')
 echo ""
-echo "✅ Установка завершена!"
+echo "✅ Установка успешно завершена!"
 echo ""
-echo "🌐 Доступ к сервисам:"
-echo "   Paperclip:           http://$(hostname -I | awk '{print $1}'):8080/"
-echo "   FreeLLMAPI:          http://$(hostname -I | awk '{print $1}'):8080/api/"
-echo "   FreeLLMAPI Dashboard: http://$(hostname -I | awk '{print $1}'):3001"
+echo "🌐 Веб-интерфейсы:"
+echo "   Paperclip:           http://$SERVER_IP:8080/"
+echo "   FreeLLMAPI Dashboard: http://$SERVER_IP:3001"
+echo "   Dockge (Управление): http://$SERVER_IP:5001"
 echo ""
-echo "📂 Все данные находятся в: $INSTALL_DIR"
-echo ""
-echo "💡 Для установки Dockge (веб-управления) выполните:"
-echo "   sudo mkdir -p /opt/stacks/dockge"
-echo "   cd /opt/stacks/dockge"
-echo "   sudo nano docker-compose.yml  # (вставьте конфиг Dockge)"
-echo "   sudo docker compose up -d"
-echo ""
-echo "📋 Управление стеком:"
-echo "   cd $INSTALL_DIR"
-echo "   sudo docker compose up -d      # Запуск"
-echo "   sudo docker compose down       # Остановка"
-echo "   sudo docker compose logs -f    # Просмотр логов"
-echo "   sudo docker compose ps         # Статус"
+echo "💡 Откройте Dockge. Стек 'ai_stack' уже будет там отображаться и управляться."
+echo "📂 Все данные лежат в: /opt/stacks/"
