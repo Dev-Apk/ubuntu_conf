@@ -20,5 +20,3 @@
 curl -fsSL https://raw.githubusercontent.com/Dev-Apk/ubuntu_conf/refs/heads/main/addusersudo.sh | sudo bash
 
 
-2. Включение sudo без пароля (sudo-nopass.sh)
-Скрипт запрашивает логин уже существующего пользователя и настраивает выполнение команд через sudo без запроса пароля. Использует безопасный метод через отдельный файл с обязательной проверкой синтаксиса через visudo.
