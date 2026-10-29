@@ -46,3 +46,9 @@ curl -fsSL https://raw.githubusercontent.com/Dev-Apk/ubuntu_conf/refs/heads/main
 ```bash
 curl -fsSL https://raw.githubusercontent.com/Dev-Apk/ubuntu_conf/refs/heads/main/ai_stack/install.sh | sudo bash
 ```
+
+
+sudo /opt/ai_stack/scripts/start.sh    # Запуск
+sudo /opt/ai_stack/scripts/stop.sh     # Остановка
+sudo /opt/ai_stack/scripts/status.sh   # Статус
+sudo /opt/ai_stack/scripts/backup.sh   # Бэкап
