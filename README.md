@@ -40,7 +40,7 @@ curl -fsSL https://raw.githubusercontent.com/Dev-Apk/ubuntu_conf/refs/heads/main
 
 ### 4. Установка AI Stack (Paperclip + FreeLLMAPI + Nginx + Dockge)
 
-Полный стек для работы с AI-агентами: Paperclip (без аутентификации), FreeLLMAPI, PostgreSQL, Nginx и Dockge для управления. Устанавливается одной командой в `/opt/ai_stack`.
+Полный стек для работы с AI-агентами: Paperclip (без аутентификации), FreeLLMAPI, PostgreSQL, Nginx и Dockge для управления. Устанавливается одной командой в `/opt/stacks/ai_stack`.
 
 **Команда для запуска:**
 ```bash
