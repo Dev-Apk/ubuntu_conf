@@ -35,3 +35,14 @@ curl -fsSL https://raw.githubusercontent.com/Dev-Apk/ubuntu_conf/refs/heads/main
 **Команда для запуска:**
 ```bash
 curl -fsSL https://raw.githubusercontent.com/Dev-Apk/ubuntu_conf/refs/heads/main/install-docker.sh | sudo bash
+```
+
+
+### 4. Установка AI Stack (Paperclip + FreeLLMAPI + Nginx + Dockge)
+
+Полный стек для работы с AI-агентами: Paperclip (без аутентификации), FreeLLMAPI, PostgreSQL, Nginx и Dockge для управления. Устанавливается одной командой в `/opt/ai_stack`.
+
+**Команда для запуска:**
+```bash
+curl -fsSL https://raw.githubusercontent.com/Dev-Apk/ubuntu_conf/refs/heads/main/ai_stack/install.sh | sudo bash
+```
