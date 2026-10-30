@@ -1,6 +1,6 @@
 services:
   backup-web:
-    build: .
+    image: ghcr.io/dev-apk/backup-web-lite:latest
     container_name: backup_web_lite
     ports:
       - 5000:5000
