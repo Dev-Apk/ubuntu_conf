@@ -70,9 +70,7 @@ sudo docker logs backup_web_lite
 
 - Linux с установленным Docker и Docker Compose
 - ~30 МБ места на диске (образ Alpine + Python)
-```
 
----
 
 ### Как загрузить в репозиторий:
 
@@ -84,4 +82,3 @@ sudo git commit -m "Add README for backup-web_lite"
 sudo git push origin main
 ```
 
-Готово — теперь у вас полноценная страница проекта на GitHub с инструкцией для любого, кто захочет установить или форкнуть. 🎉
