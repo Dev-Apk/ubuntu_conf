@@ -13,6 +13,8 @@
 
 ## 🚀 Установка без сборкой
 
+compose.yaml
+
 ```yaml
 services:
   backup-web:
