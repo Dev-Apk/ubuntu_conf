@@ -11,7 +11,23 @@
 - 🗑️ Удаление старых бэкапов
 - 🚫 Без пароля и БД — идеально для LAN/SSH-туннеля
 
-## 🚀 Установка одной командой
+## 🚀 Установка одной командой без сборкой
+
+```yaml
+services:
+  backup-web:
+    image: ghcr.io/dev-apk/backup-web-lite:latest
+    container_name: backup_web_lite
+    ports:
+      - 5000:5000
+    volumes:
+      - /:/host:ro
+      - /opt/backups:/host/opt/backups
+    restart: unless-stopped
+```
+
+
+## 🚀 Установка одной командой со сборкой
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/Dev-Apk/ubuntu_conf/main/backup-web_lite/install.sh | sudo bash
