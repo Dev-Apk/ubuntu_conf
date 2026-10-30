@@ -1,0 +1,10 @@
+services:
+  backup-web:
+    build: .
+    container_name: backup_web_lite
+    ports:
+      - 5000:5000
+    volumes:
+      - /:/host:ro
+      - /opt/backups:/host/opt/backups
+    restart: unless-stopped
