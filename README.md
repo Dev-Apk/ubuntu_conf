@@ -33,10 +33,13 @@ curl -fsSL https://raw.githubusercontent.com/Dev-Apk/ubuntu_conf/refs/heads/main
 потому что копипас
 
 **Команда для запуска:**
+
+cmd
 ```cmd
 type %USERPROFILE%\.ssh\id_ed25519.pub | ssh юзер@IP_СЕРВЕРА "mkdir -p ~/.ssh && cat >> ~/.ssh/authorized_keys"
 ```
 
+PowerShell
 ``` PowerShell
 type $env:USERPROFILE\.ssh\id_ed25519.pub | ssh юзер@IP_СЕРВЕРА "mkdir -p ~/.ssh && cat >> ~/.ssh/authorized_keys"
 ```
