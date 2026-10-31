@@ -28,6 +28,18 @@ curl -fsSL https://raw.githubusercontent.com/Dev-Apk/ubuntu_conf/refs/heads/main
 curl -fsSL https://raw.githubusercontent.com/Dev-Apk/ubuntu_conf/refs/heads/main/sudo-nopass.sh | sudo bash
 ```
 
+###  памятка закинуть ключ ssh из винды в никс
+
+потому что копипас
+
+**Команда для запуска:**
+```cmd
+type %USERPROFILE%\.ssh\id_ed25519.pub | ssh юзер@IP_СЕРВЕРА "mkdir -p ~/.ssh && cat >> ~/.ssh/authorized_keys"
+```
+
+``` PowerShell
+type $env:USERPROFILE\.ssh\id_ed25519.pub | ssh юзер@IP_СЕРВЕРА "mkdir -p ~/.ssh && cat >> ~/.ssh/authorized_keys"
+```
 
 ### 3. Установка Docker и Docker Compose (`install-docker.sh`)
 Скрипт полностью автоматизирует установку официального Docker Engine и Docker Compose плагина. Он удаляет конфликтующие старые версии, добавляет официальный репозиторий, настраивает автозапуск и добавляет текущего пользователя в группу `docker` для работы без `sudo`.
